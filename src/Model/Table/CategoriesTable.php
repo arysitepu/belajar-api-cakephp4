@@ -58,7 +58,12 @@ class CategoriesTable extends Table
             ->scalar('name_categories')
             ->maxLength('name_categories', 255)
             ->requirePresence('name_categories', 'create')
-            ->notEmptyString('name_categories');
+            ->notEmptyString('name_categories')
+            ->add('name_categories', 'unique', [
+                'rule' => 'ValidateUnique',
+                'provider' => 'table',
+                'message' => 'Nama kategori sudah ada'
+            ]);
 
         return $validator;
     }

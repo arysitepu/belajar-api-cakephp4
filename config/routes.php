@@ -6,8 +6,11 @@ use Cake\Routing\RouteBuilder;
 return function (RouteBuilder $routes): void {
     $routes->setRouteClass(DashedRoute::class);
     $routes->scope('/api', function (RouteBuilder $builder): void {
+        $builder->setExtensions('json', 'xml', 'html');
         $builder->connect('/', ['controller' => 'Pages', 'action' => 'display', 'home']);
-        $builder->connect('/categories/add', ['controller' => 'Categories', 'action' => 'add', '_method' => 'POST']);
+        // $builder->connect('/categories/add', ['controller' => 'Categories', 'action' => 'add', '_method' => 'POST']);
+        // $builder->connect('/categories', ['controller' => 'Categories', 'action' => 'index']);
+        $builder->resources('categories');
         $builder->connect('/pages/*', 'Pages::display');
         $builder->fallbacks();
     });   

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controller;
 use App\Controller\AppController;
 use Cake\Http\Middleware\CsrfProtectionMiddleware;
+use Cake\View\JsonView;
 
 class CategoriesController extends AppController
 {
@@ -18,6 +19,11 @@ class CategoriesController extends AppController
         parent::initialize();
         $this->loadComponent('RequestHandler');
         // $this->getEventManager()->off($this->Csrf);
+     }
+
+     public function viewClasses(): array
+     {
+        return [JsonView::class];
      }
 
     public function beforeFilter(\Cake\Event\EventInterface $event)
@@ -39,8 +45,12 @@ class CategoriesController extends AppController
 
     public function index()
     {
-        $categories = $this->paginate($this->Categories);
-        $this->set(compact('categories'));
+       
+        $categories = $this->Categories->find('all')->all();
+        $this->set('categories', $categories);
+        $this->viewBuilder()->setOption('serialize', ['categories']);
+        // $categories = $this->paginate($this->Categories);
+        // $this->set(compact('categories'));
     }
 
     /**
@@ -66,18 +76,24 @@ class CategoriesController extends AppController
      */
     public function add()
     {
+
         $category = $this->Categories->newEmptyEntity();
-        $category = $this->Categories->patchEntity($category, $this->request->getData());
-        if ($this->Categories->save($category)) {
-            $message = 'Saved';
-        } else {
-            $message = 'Error';
+        if($this->request->is('post')){
+            $category = $this->Categories->patchEntity($category, $this->request->getData());
+            if ($this->Categories->save($category)) {
+                $message = 'Saved';
+            } else {
+                $message = 'Error';
+                $errors = $category->getErrors();
+            }
         }
         $this->set([
             'message' => $message,
             'category' => $category,
+            'errors' => isset($errors) ? $errors : null,
             '_serialize' => ['message', 'category']
         ]);
+        $this->viewBuilder()->setOption('serialize', ['category', 'message', 'errors']);
     }
     
 
@@ -90,19 +106,45 @@ class CategoriesController extends AppController
      */
     public function edit($id = null)
     {
+
         $category = $this->Categories->get($id, [
             'contain' => [],
         ]);
         if ($this->request->is(['patch', 'post', 'put'])) {
             $category = $this->Categories->patchEntity($category, $this->request->getData());
+            
             if ($this->Categories->save($category)) {
-                $this->Flash->success(__('The category has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
+                $message = 'Category updated successfully';
+                $errors = null;
+            }else{
+                $message = 'Error updating category';
+                $errors = $category->getErrors();
             }
-            $this->Flash->error(__('The category could not be saved. Please, try again.'));
+        }else{
+            $message = 'Invalid request method';
+            $errors = null;
         }
-        $this->set(compact('category'));
+        $this->set([
+            'message' => $message,
+            'category' => $category,
+            'errors' => isset($errors) ? $errors : null,
+            '_serialize' => ['message', 'category']
+        ]);
+        $this->viewBuilder()->setOption('serialize', ['category', 'message', 'errors']);
+
+        // $category = $this->Categories->get($id, [
+        //     'contain' => [],
+        // ]);
+        // if ($this->request->is(['patch', 'post', 'put'])) {
+        //     $category = $this->Categories->patchEntity($category, $this->request->getData());
+        //     if ($this->Categories->save($category)) {
+        //         $this->Flash->success(__('The category has been saved.'));
+
+        //         return $this->redirect(['action' => 'index']);
+        //     }
+        //     $this->Flash->error(__('The category could not be saved. Please, try again.'));
+        // }
+        // $this->set(compact('category'));
     }
 
     /**

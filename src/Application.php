@@ -83,10 +83,7 @@ class Application extends BaseApplication
             // Contoh: Mengecualikan CSRF untuk action 'add' pada CategoriesController
             $controller = $request->getParam('controller');
             $action = $request->getParam('action');
-            if ($controller === 'Categories' && $action === 'add') {
-                return true; // Skip CSRF check
-            }
-            return false; // Terapkan CSRF check untuk kondisi lainnya
+           return $controller === 'Categories' && in_array($action, ['add', 'edit']);
         });
     
         $middlewareQueue
@@ -95,6 +92,27 @@ class Application extends BaseApplication
             ->add($csrf);
     
         return $middlewareQueue;
+
+        // $csrf = new CsrfProtectionMiddleware([
+        //     'httpOnly' => true,
+        // ]);
+    
+        // $csrf->skipCheckCallback(function ($request) {
+        //     // Contoh: Mengecualikan CSRF untuk action 'add' pada CategoriesController
+        //     $controller = $request->getParam('controller');
+        //     $action = $request->getParam('action');
+        //     if ($controller === 'Categories' && $action === 'add') {
+        //         return true; // Skip CSRF check
+        //     }
+        //     return false; // Terapkan CSRF check untuk kondisi lainnya
+        // });
+    
+        // $middlewareQueue
+        //     ->add(new RoutingMiddleware($this))
+        //     ->add(new BodyParserMiddleware())
+        //     ->add($csrf);
+    
+        // return $middlewareQueue;
         
     }
 

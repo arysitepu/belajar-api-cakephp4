@@ -29,4 +29,11 @@ class Category extends Entity
         'created' => true,
         'modified' => true,
     ];
+
+    protected function _initlizeSchema(\Cake\Database\Schema\TableSchemaInterface $schema)
+    {
+        $schema->setColumnType('id', 'uuid');
+        return $schema;
+    }
+
 }
